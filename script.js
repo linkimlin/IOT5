@@ -11,7 +11,7 @@ const elements = {
     acAutoStatus: document.getElementById('ac-auto-status')
 };
 
-// 按钮事件监听（保持原有按钮ID的绑定）
+// 按钮事件监听
 document.getElementById('light-on').addEventListener('click', () => sendCommand('A'));
 document.getElementById('light-off').addEventListener('click', () => sendCommand('B'));
 document.getElementById('light-auto').addEventListener('click', () => sendCommand('H'));
@@ -24,48 +24,46 @@ document.getElementById('curtain-open').addEventListener('click', () => sendComm
 document.getElementById('curtain-stop').addEventListener('click', () => sendCommand('D'));
 document.getElementById('curtain-close').addEventListener('click', () => sendCommand('E'));
 
-// 发送命令到服务器（优化版）
+// 发送命令到服务器（增强版）
 async function sendCommand(command) {
     try {
         console.log('正在发送命令:', command);
         const response = await fetch(`${API_URL}/command`, {
-            method: 'POST',  // 强制使用POST
+            method: 'POST',
             headers: {
-                'Content-Type': 'application/json',  // 关键头信息
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({ command: command })
         });
 
-        // 处理HTTP错误状态码
+        // 处理非2xx状态码
         if (!response.ok) {
-            // 智能解析错误响应内容（优先JSON）
-            const errorBody = await (
-                response.headers.get('Content-Type')?.includes('application/json') 
-                ? response.json() 
-                : response.text()
-            );
-            throw new Error(`请求失败（状态码${response.status}）: ${JSON.stringify(errorBody)}`);
+            // 根据响应类型解析错误信息
+            const errorContent = response.headers.get('Content-Type')?.includes('application/json')
+                ? await response.json()  // JSON错误信息
+                : await response.text();  // 文本或HTML错误信息
+            
+            const errorMsg = `请求失败（状态码${response.status}）: ${JSON.stringify(errorContent)}`;
+            throw new Error(errorMsg);
         }
 
         // 验证响应类型是否为JSON
         if (!response.headers.get('Content-Type')?.includes('application/json')) {
-            throw new Error('无效的响应类型，预期为application/json');
+            throw new Error(`无效响应类型: ${response.headers.get('Content-Type')}（预期application/json）`);
         }
 
         const data = await response.json();
         console.log('命令发送成功:', data);
-        
-        // 更新状态显示
         updateStatusDisplay(data);
-        return data;  // 返回后端响应数据
+        return data;
 
     } catch (error) {
-        console.error('发送命令错误:', error.message);
-        alert(`命令发送失败：${error.message}`);  // 统一错误提示
+        console.error('发送命令错误:', error);
+        alert(`命令发送失败：${error.message}`);  // 显示具体错误信息
     }
 }
 
-// 更新状态显示（保持原有逻辑）
+// 更新状态显示
 function updateStatusDisplay(data) {
     if (data.lightAuto !== undefined) {
         elements.lightAutoStatus.textContent = data.lightAuto ? '开启' : '关闭';
@@ -75,14 +73,24 @@ function updateStatusDisplay(data) {
     }
 }
 
-// 更新传感器数据（保持原有逻辑）
+// 更新传感器数据（增强版）
 async function updateSensorData() {
     try {
         const response = await fetch(`${API_URL}/status`);
+
+        // 处理非2xx状态码
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorContent = response.headers.get('Content-Type')?.includes('application/json')
+                ? await response.json()
+                : await response.text();
+            throw new Error(`获取状态失败（状态码${response.status}）: ${JSON.stringify(errorContent)}`);
         }
-        
+
+        // 验证响应类型
+        if (!response.headers.get('Content-Type')?.includes('application/json')) {
+            throw new Error(`无效响应类型: ${response.headers.get('Content-Type')}（预期application/json）`);
+        }
+
         const data = await response.json();
         console.log('收到数据:', data);
         
@@ -91,13 +99,13 @@ async function updateSensorData() {
         elements.humidity.textContent = `${data.humidity} %`;
         elements.light.textContent = `${data.light} lux`;
         
-        // 更新状态显示
         updateStatusDisplay(data);
     } catch (error) {
         console.error('更新数据错误:', error);
+        // 可添加UI提示（如显示错误信息到页面）
     }
 }
 
-// 定期更新数据（保持原有逻辑）
+// 定期更新数据
 setInterval(updateSensorData, UPDATE_INTERVAL);
 updateSensorData();  // 立即执行一次更新 
