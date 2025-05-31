@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Cache-Control" content="public, max-age=31536000">
+    <meta name="theme-color" content="#4CAF50" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#2E7D32" media="(prefers-color-scheme: dark)">
+    <title>智能家居监控系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>智能家居监控系统</h1>
+        </header>
+        
+        <div class="main-content">
+            <!-- 传感器数据显示区域 -->
+            <div class="sensor-panel">
+                <h2>传感器数据</h2>
+                <div class="sensor-data">
+                    <div class="data-item">
+                        <span class="label">温度:</span>
+                        <span id="temperature">-- ℃</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="label">湿度:</span>
+                        <span id="humidity">-- %</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="label">光线:</span>
+                        <span id="light">-- lux</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 控制面板 -->
+            <div class="control-panel">
+                <!-- 灯光控制 -->
+                <div class="control-section">
+                    <h2>灯光控制</h2>
+                    <div class="status-display">
+                        <span>自动状态: </span>
+                        <span id="light-auto-status">关闭</span>
+                    </div>
+                    <div class="button-group">
+                        <button id="light-on">开灯</button>
+                        <button id="light-off">关灯</button>
+                        <button id="light-auto">自动控制</button>
+                    </div>
+                </div>
+
+                <!-- 空调控制 -->
+                <div class="control-section">
+                    <h2>空调控制</h2>
+                    <div class="status-display">
+                        <span>自动状态: </span>
+                        <span id="ac-auto-status">关闭</span>
+                    </div>
+                    <div class="button-group">
+                        <button id="ac-on">开空调</button>
+                        <button id="ac-off">关空调</button>
+                        <button id="ac-auto">自动控制</button>
+                    </div>
+                </div>
+
+                <!-- 窗帘控制 -->
+                <div class="control-section">
+                    <h2>窗帘控制</h2>
+                    <div class="button-group">
+                        <button id="curtain-open">开窗帘</button>
+                        <button id="curtain-stop">停窗帘</button>
+                        <button id="curtain-close">关窗帘</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
