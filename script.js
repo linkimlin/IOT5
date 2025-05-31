@@ -1,5 +1,5 @@
 // 配置参数
-const API_URL = ' https://4693-124-64-23-130.ngrok-free.app/api';
+const API_URL = 'https://4693-124-64-23-130.ngrok-free.app/api';
 const UPDATE_INTERVAL = 1000;  // 更新间隔（毫秒）
 
 // DOM元素
@@ -11,7 +11,7 @@ const elements = {
     acAutoStatus: document.getElementById('ac-auto-status')
 };
 
-// 按钮事件监听
+// 按钮事件监听（保持原有按钮ID的绑定）
 document.getElementById('light-on').addEventListener('click', () => sendCommand('A'));
 document.getElementById('light-off').addEventListener('click', () => sendCommand('B'));
 document.getElementById('light-auto').addEventListener('click', () => sendCommand('H'));
@@ -24,34 +24,48 @@ document.getElementById('curtain-open').addEventListener('click', () => sendComm
 document.getElementById('curtain-stop').addEventListener('click', () => sendCommand('D'));
 document.getElementById('curtain-close').addEventListener('click', () => sendCommand('E'));
 
-// 发送命令到服务器
+// 发送命令到服务器（优化版）
 async function sendCommand(command) {
     try {
         console.log('正在发送命令:', command);
         const response = await fetch(`${API_URL}/command`, {
-            method: 'POST',
+            method: 'POST',  // 强制使用POST
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json',  // 关键头信息
             },
             body: JSON.stringify({ command: command })
         });
-        
+
+        // 处理HTTP错误状态码
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            // 智能解析错误响应内容（优先JSON）
+            const errorBody = await (
+                response.headers.get('Content-Type')?.includes('application/json') 
+                ? response.json() 
+                : response.text()
+            );
+            throw new Error(`请求失败（状态码${response.status}）: ${JSON.stringify(errorBody)}`);
         }
-        
+
+        // 验证响应类型是否为JSON
+        if (!response.headers.get('Content-Type')?.includes('application/json')) {
+            throw new Error('无效的响应类型，预期为application/json');
+        }
+
         const data = await response.json();
         console.log('命令发送成功:', data);
         
         // 更新状态显示
         updateStatusDisplay(data);
+        return data;  // 返回后端响应数据
+
     } catch (error) {
-        console.error('发送命令错误:', error);
-        alert('命令发送失败，请检查网络连接和服务器状态');
+        console.error('发送命令错误:', error.message);
+        alert(`命令发送失败：${error.message}`);  // 统一错误提示
     }
 }
 
-// 更新状态显示
+// 更新状态显示（保持原有逻辑）
 function updateStatusDisplay(data) {
     if (data.lightAuto !== undefined) {
         elements.lightAutoStatus.textContent = data.lightAuto ? '开启' : '关闭';
@@ -61,7 +75,7 @@ function updateStatusDisplay(data) {
     }
 }
 
-// 更新传感器数据
+// 更新传感器数据（保持原有逻辑）
 async function updateSensorData() {
     try {
         const response = await fetch(`${API_URL}/status`);
@@ -84,6 +98,6 @@ async function updateSensorData() {
     }
 }
 
-// 定期更新数据
+// 定期更新数据（保持原有逻辑）
 setInterval(updateSensorData, UPDATE_INTERVAL);
 updateSensorData();  // 立即执行一次更新 
